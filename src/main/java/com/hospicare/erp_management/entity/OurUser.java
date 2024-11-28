@@ -2,6 +2,8 @@ package com.hospicare.erp_management.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -30,7 +32,10 @@ public class OurUser implements UserDetails {
     @Column(nullable = false)
     private boolean enabled = true;
 
-    @ManyToMany
+    @Column
+    private String city;
+
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),

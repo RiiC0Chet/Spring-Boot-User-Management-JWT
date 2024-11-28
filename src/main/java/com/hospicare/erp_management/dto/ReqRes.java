@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.hospicare.erp_management.entity.OurUser;
 import com.hospicare.erp_management.entity.Role;
-import jakarta.persistence.Column;
 import lombok.Data;
 
 import java.util.List;
@@ -17,6 +16,7 @@ import java.util.Set;
 public class ReqRes {
 
     private int statusCode;
+    private String error;
     private String message;
     private String token;
     private String refreshToken;
@@ -25,6 +25,7 @@ public class ReqRes {
     private String username;
     private String email;
     private String password;
+    private String city;
     private boolean enabled;
 
     private OurUser ourUser;
