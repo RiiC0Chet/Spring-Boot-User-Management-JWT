@@ -11,6 +11,7 @@ import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +39,16 @@ public class UsersManagementService {
     @Autowired
     private EntityManager entityManager;
 
+    // Método auxiliar para obtener un usuario y refrescar
+    private OurUser getUserWithRoles(Long userId) {
+        Optional<OurUser> optionalUser = usersRepo.findById(userId);
+        if (optionalUser.isPresent()) {
+            OurUser user = optionalUser.get();
+            entityManager.refresh(user); // Realiza el refresh para cargar los roles
+            return user;
+        }
+        throw new UsernameNotFoundException("User not found with id: " + userId); // Maneja el caso de usuario no encontrado
+    }
 
     public ReqRes register(ReqRes registrationRequest){
         ReqRes resp = new ReqRes();
@@ -125,13 +136,14 @@ public class UsersManagementService {
         }
     }
 
-
+    @Transactional
     public ReqRes getAllUsers() {
         ReqRes reqRes = new ReqRes();
 
         try {
             List<OurUser> result = usersRepo.findAll();
             if (!result.isEmpty()) {
+                result.forEach(user -> entityManager.refresh(user));
                 reqRes.setOurUserList(result);
                 reqRes.setStatusCode(200);
                 reqRes.setMessage("Successful");
@@ -147,11 +159,12 @@ public class UsersManagementService {
         }
     }
 
-
+    @Transactional
     public ReqRes getUsersById(Long id) {
         ReqRes reqRes = new ReqRes();
         try {
             OurUser usersById = usersRepo.findById(id).orElseThrow(() -> new RuntimeException("User Not found"));
+            entityManager.refresh(usersById);
             reqRes.setOurUser(usersById);
             reqRes.setStatusCode(200);
             reqRes.setMessage("Users with id '" + id + "' found successfully");
@@ -214,12 +227,13 @@ public class UsersManagementService {
         return reqRes;
     }
 
-
+    @Transactional
     public ReqRes getMyInfo(String email){
         ReqRes reqRes = new ReqRes();
         try {
             Optional<OurUser> userOptional = usersRepo.findByEmail(email);
             if (userOptional.isPresent()) {
+                entityManager.refresh(userOptional.get());
                 reqRes.setOurUser(userOptional.get());
                 reqRes.setStatusCode(200);
                 reqRes.setMessage("successful");
