@@ -3,7 +3,7 @@ services:
   app:
     build: .
     volumes:
-      - .:/app
+      - ./back-end:/app
     depends_on:
       - db
     ports:
